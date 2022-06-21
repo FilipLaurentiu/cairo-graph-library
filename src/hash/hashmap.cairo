@@ -118,3 +118,40 @@ func clear{hash_map_ptr : HashMap*}():
     hash_map_ptr.value_map = value_map_ptr
     return ()
 end
+
+func keys{hash_map_ptr : HashMap*}() -> (res_len : felt, res : felt*):
+    let keys_array : felt* = hash_map_ptr.keys
+    return (hash_map_ptr.entries_len, keys_array)
+end
+
+func values{hash_map_ptr : HashMap*}() -> (res_len : felt, res : felt*):
+    let values_array : felt* = hash_map_ptr.values
+    return (hash_map_ptr.entries_len, values_array)
+end
+
+func entries{hash_map_ptr : HashMap*}() -> (entries_len : felt, entries : KeyValue*):
+    alloc_locals
+    tempvar entries_len = hash_map_ptr.entries_len
+    let keys : felt* = hash_map_ptr.keys
+    let entries : KeyValue* = alloc()
+
+    _get_entries(entries_len, keys, entries)
+    return (entries_len, entries)
+end
+
+func _get_entries{hash_map_ptr : HashMap*}(keys_len : felt, keys : felt*, entries : KeyValue*):
+    if keys_len == 0:
+        return ()
+    end
+    tempvar key = [keys]
+    let (value : felt) = get(key)
+    assert entries.key = key
+    assert entries.value = value
+
+    return _get_entries(keys_len - 1, keys + 1, entries + KeyValue.SIZE)
+end
+
+func size{hash_map_ptr : HashMap*}() -> (size : felt):
+    let entries_len = hash_map_ptr.entries_len
+    return (entries_len)
+end
